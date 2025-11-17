@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  postgres-db:
+    image: postgres:13
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: evolution
+      POSTGRES_PASSWORD: evolution123
+      POSTGRES_DB: template_db
+    ports:
+      - "5501:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - spring-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U evolution -d template_db" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  spring-app:
+    build:
+      context: .
+      args:
+        - GRADLE_USER_HOME=/cache
+    container_name: spring-app
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/template_db
+      SPRING_DATASOURCE_USERNAME: evolution
+      SPRING_DATASOURCE_PASSWORD: evolution123
+      JWT_SECRET: ${JWT_SECRET:-cS6VIG2F8ZnKPeTJs6Sl3uyXZl7UNMkRM0V0dTamzgkBq68d2zVGfCpKLsKoZ8LM}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      EMAIL_PROVIDER: ${EMAIL_PROVIDER:-google}
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+    ports:
+      - "6003:6003"
+    volumes:
+      - gradle-cache:/cache
+    networks:
+      - spring-network
+
+volumes:
+  postgres_data:
+  gradle-cache:
+
+networks:
+  spring-network:
+

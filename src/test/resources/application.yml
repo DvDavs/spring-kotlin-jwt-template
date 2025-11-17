@@ -1,0 +1,33 @@
+server:
+    port: 6003
+    error:
+        whitelabel:
+          enabled: false
+        include-message: always
+template:
+    jwt:
+        secret: test-secret-key-for-testing-purposes-at-least-256-bits-long-string
+        issuer: evolutiondevmx
+        expiration: 3600000
+spring:
+    application:
+        name: Template-Test
+    datasource:
+        driver-class-name: org.h2.Driver
+        url: jdbc:h2:mem:testdb
+        username: sa
+        password: 
+    jpa:
+        hibernate:
+            ddl-auto: create-drop
+        properties:
+            hibernate:
+                dialect: org.hibernate.dialect.H2Dialect
+    flyway:
+        enabled: false
+logging:
+    level:
+        root: info
+        org.hibernate: info
+        org.springframework: info
+

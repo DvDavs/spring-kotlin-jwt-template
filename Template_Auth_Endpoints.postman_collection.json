@@ -1,0 +1,317 @@
+{
+	"info": {
+		"_postman_id": "template-auth-2024",
+		"name": "Template - Authentication Endpoints",
+		"description": "Colección de endpoints de autenticación para el proyecto Template (Spring Boot + Kotlin + JWT)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Authentication (Public)",
+			"item": [
+				{
+					"name": "Login (Get Token)",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"david@davscode.com\",\n    \"password\": \"4dm1n1straT0r123$\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/token",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"token"
+							]
+						},
+						"description": "Endpoint para iniciar sesión y obtener el access token y refresh token.\n\n**Usuarios disponibles:**\n- david@davscode.com (MASTER)\n- denisse@davscode.com (ADMIN)\n- moises@davscode.com (ADMIN)\n- carlos.garcia@davscode.com (USER)\n- ana.martinez@davscode.com (USER)\n\n**Password:** 4dm1n1straT0r123$"
+					},
+					"response": []
+				},
+				{
+					"name": "Register New User",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Juan\",\n    \"lastName\": \"Pérez\",\n    \"email\": \"juan.perez@davscode.com\",\n    \"password\": \"MySecureP@ssw0rd\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Endpoint para registrar un nuevo usuario. El usuario se crea con rol USER por defecto."
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refreshToken\": \"YOUR_REFRESH_TOKEN_HERE\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/refresh-token",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"refresh-token"
+							]
+						},
+						"description": "Endpoint para renovar el access token usando el refresh token. \n\nEl refresh token tiene una duración de 7 días."
+					},
+					"response": []
+				},
+				{
+					"name": "Request Password Reset",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"david@davscode.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/request-password-reset",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"request-password-reset"
+							]
+						},
+						"description": "Endpoint para solicitar un token de restablecimiento de contraseña.\n\n📧 El sistema envía automáticamente un email al usuario con un enlace para restablecer su contraseña.\n\nEl enlace es válido por 15 minutos e incluye:\n- Nombre del usuario\n- Botón/enlace para restablecer contraseña\n- Redirección al frontend: {{FRONTEND_URL}}/reset-password?token=...\n\n⚠️ REQUISITO: Debes configurar las variables de entorno MAIL_USERNAME y MAIL_PASSWORD (ver README.md)"
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"resetToken\": \"TOKEN_FROM_PREVIOUS_STEP\",\n    \"newPassword\": \"NewSecureP@ssw0rd123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/reset-password",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"reset-password"
+							]
+						},
+						"description": "Endpoint para restablecer la contraseña usando el token de restablecimiento.\n\nEl token tiene una validez de 1 hora."
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints de autenticación públicos (no requieren token JWT)"
+		},
+		{
+			"name": "2. Protected Endpoints (Examples)",
+			"item": [
+				{
+					"name": "Test ADMIN Endpoint",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"admin",
+								"users"
+							]
+						},
+						"description": "Endpoint de ejemplo protegido que requiere rol ADMIN o MASTER.\n\nEste endpoint aún no está implementado, pero puedes usarlo para probar la autenticación."
+					},
+					"response": []
+				},
+				{
+					"name": "Test MASTER Endpoint",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/master/settings",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"master",
+								"settings"
+							]
+						},
+						"description": "Endpoint de ejemplo protegido que requiere rol MASTER.\n\nEste endpoint aún no está implementado, pero puedes usarlo para probar la autenticación."
+					},
+					"response": []
+				},
+				{
+					"name": "Test USER Endpoint",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/user/profile",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"profile"
+							]
+						},
+						"description": "Endpoint de ejemplo protegido que requiere estar autenticado (cualquier rol).\n\nEste endpoint aún no está implementado, pero puedes usarlo para probar la autenticación."
+					},
+					"response": []
+				}
+			],
+			"description": "Ejemplos de endpoints protegidos para probar la autenticación JWT"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Auto-save access_token from login response",
+					"if (pm.response.code === 200) {",
+					"    try {",
+					"        const jsonData = pm.response.json();",
+					"        if (jsonData.accessToken) {",
+					"            pm.environment.set(\"access_token\", jsonData.accessToken);",
+					"            console.log(\"✅ Access token saved to environment\");",
+					"        }",
+					"        if (jsonData.refreshToken) {",
+					"            pm.environment.set(\"refresh_token\", jsonData.refreshToken);",
+					"            console.log(\"✅ Refresh token saved to environment\");",
+					"        }",
+					"    } catch (e) {",
+					"        // Not a JSON response or no tokens",
+					"    }",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:6003",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refresh_token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
+
