@@ -47,11 +47,8 @@ class SecurityConfig(
                 "/webjars/**"
             ).permitAll()
             
-            // Protected endpoints
-            it.requestMatchers("/admin/administrators/users/**").hasRole("MASTER")
-            it.requestMatchers("/admin/**").hasAnyRole("ADMIN", "MASTER")
-            it.requestMatchers("/user/**").hasAnyRole("USER", "ADMIN", "MASTER")
-            it.requestMatchers("/master/**").hasRole("MASTER")
+            // RBAC: Protected endpoints use @PreAuthorize("hasAuthority('permission')") on controllers
+            // All other requests require authentication
             it.anyRequest().authenticated()
         }.addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter::class.java)
         return http.build()
