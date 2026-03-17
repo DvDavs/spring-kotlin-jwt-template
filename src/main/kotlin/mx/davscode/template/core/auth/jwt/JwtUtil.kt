@@ -17,7 +17,7 @@ class JwtUtil(
 ) {
     private val signingKey = Keys.hmacShaKeyFor(secretKey.toByteArray())
 
-    fun generateToken(userId: Long, email: String, role: String): String {
+    fun generateToken(userId: Long, email: String, role: String, permissions: List<String> = emptyList()): String {
         val now = Date()
         val expiryDate = Date(now.time + expirationMillis)
 
@@ -28,6 +28,7 @@ class JwtUtil(
                 .setExpiration(expiryDate)
                 .claim("email", email)
                 .claim("role", role)
+                .claim("permissions", permissions)
                 .signWith(signingKey, SignatureAlgorithm.HS256)
                 .compact()
     }

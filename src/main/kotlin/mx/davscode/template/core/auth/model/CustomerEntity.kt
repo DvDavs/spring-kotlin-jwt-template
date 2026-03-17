@@ -26,9 +26,9 @@ data class CustomerEntity(
         @Column(nullable = false)
         var password: String = "",
 
-        @Enumerated(EnumType.STRING)
-        @Column(nullable = false)
-        var role: Role = Role.USER,
+        @ManyToOne(fetch = FetchType.EAGER)
+        @JoinColumn(name = "role_id", nullable = false)
+        var roleEntity: RoleEntity,
 
         @Column(name = "is_enabled", nullable = false)
         var isEnabled: Boolean = true,
@@ -58,5 +58,10 @@ data class CustomerEntity(
         @UpdateTimestamp
         @Column(name = "updated_at")
         var updatedAt: Instant? = null
-)
+) {
+    fun hasPermission(permissionName: String): Boolean =
+        roleEntity.permissions.any { it.name == permissionName }
+
+    val roleName: String get() = roleEntity.name
+}
 

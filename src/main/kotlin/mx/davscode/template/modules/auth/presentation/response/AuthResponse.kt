@@ -13,6 +13,8 @@ data class UserInfo(
     val name: String,
     val lastName: String,
     val email: String,
-    val role: String
+    val role: String,
+    val permissions: List<String> = emptyList(),
+    val isBanned: Boolean = false
 )
 

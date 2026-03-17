@@ -7,8 +7,9 @@ import kotlinx.coroutines.launch
 import mx.evolutiondev.template.core.auth.jwt.JwtUtil
 import mx.evolutiondev.template.core.auth.model.CustomerEntity
 import mx.evolutiondev.template.core.auth.model.RefreshTokenEntity
-import mx.evolutiondev.template.core.auth.model.Role
+import mx.evolutiondev.template.core.auth.model.RoleEntity
 import mx.evolutiondev.template.core.auth.repository.CustomerRepository
+import mx.evolutiondev.template.core.auth.repository.RoleRepository
 import mx.evolutiondev.template.core.auth.repository.RefreshTokenRepository
 import mx.evolutiondev.template.core.email.EmailService
 import mx.evolutiondev.template.core.error.exception.*
@@ -26,6 +27,7 @@ import java.time.temporal.ChronoUnit
 @Service
 class AuthService(
     private val customerRepository: CustomerRepository,
+    private val roleRepository: RoleRepository,
     private val refreshTokenRepository: RefreshTokenRepository,
     private val passwordEncoder: PasswordEncoder,
     private val jwtUtil: JwtUtil,
@@ -37,7 +39,7 @@ class AuthService(
 
     @Transactional
     fun login(request: LoginRequest): AuthResponse {
-        val customer = customerRepository.findByEmail(request.email)
+        val customer = customerRepository.findByEmailWithRoleAndPermissions(request.email)
             ?: throw InvalidCredentialsException("Invalid email or password")
 
         if (!customer.isEnabled) {
@@ -61,12 +63,14 @@ class AuthService(
             throw DuplicateEmailException("Email ${request.email} is already registered. Please use a different email.")
         }
 
+        val userRole = roleRepository.findByName("USER")
+            ?: throw IllegalStateException("Default USER role not found. Run migrations and PermissionSeeder.")
         val customer = CustomerEntity(
             name = request.name,
             lastName = request.lastName,
             email = request.email,
             password = passwordEncoder.encode(request.password),
-            role = Role.USER,
+            roleEntity = userRole,
             isEnabled = true,
             isBanned = false
         )
@@ -141,7 +145,8 @@ class AuthService(
     }
 
     private fun generateAuthResponse(customer: CustomerEntity): AuthResponse {
-        val accessToken = jwtUtil.generateToken(customer.id, customer.email, customer.role.name)
+        val permissions = customer.roleEntity.permissions.map { it.name }
+        val accessToken = jwtUtil.generateToken(customer.id, customer.email, customer.roleEntity.name, permissions)
 
         // Create refresh token
         val refreshToken = jwtUtil.generateSecureToken()
@@ -161,7 +166,9 @@ class AuthService(
                 name = customer.name,
                 lastName = customer.lastName,
                 email = customer.email,
-                role = customer.role.name
+                role = customer.roleEntity.name,
+                permissions = permissions,
+                isBanned = customer.isBanned
             )
         )
     }
